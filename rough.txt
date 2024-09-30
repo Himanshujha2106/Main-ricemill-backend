@@ -1,0 +1,42 @@
+*. get the data with id from data base You shoud know the id
+
+@app.get("/truck/{truck_number}", status_code=status.HTTP_200_OK)
+async def get_truck_data(truck_number: int, db: db_dependency):
+    truck_data = (
+        db.query(models.Truck).filter(models.Truck.truck_number == truck_number).first()
+    )
+    if truck_data is None:
+        raise HTTPException(status_code=404, detail="Truck Number Not Found")
+    return truck_data
+
+
+
+@app.get(
+    "/transporters-name/", response_model=List[str], status_code=status.HTTP_200_OK
+)
+async def get_all_transporters(db: db_dependency):
+    transporters_names = db.query(models.Transporter.transporter_name).distinct().all()
+    return [transporter[0] for transporter in transporters_names]
+
+
+Mysql password - Chirag3949
+uvicorn main:app --reload
+start myenv - source myenv/bin/activate
+
+
+
+
+@app.get("/get-ware-house-data/{ware_house_id}",response_model=wareHousetrasportingrate,status_code=status.HTTP_200_OK)
+async def get_all_ware_house_data(ware_house:int, db:db_dependency):
+    ware_house_data = db.query(models.ware_house_transporting).filter_by(ware_houes_id=ware_house).first()
+    if ware_house_data is None:
+        raise HTTPException(status_code=404, detail="Ware house not found")
+    
+    responce_data = {"transporting_rate": ware_house_data.ware_house_transporting_rate}
+    return responce_data
+    
+
+
+
+
+
