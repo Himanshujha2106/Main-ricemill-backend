@@ -176,11 +176,11 @@ async def token_key_header(token: Optional[str] = Header(default=None)):
     dependencies=[Depends(api_key_header)],
     tags=["Role"]
 )
-async def set_admin( token: TokenBase,admin_key:str, db: Session = Depends(get_db)):
+async def set_admin( admin_key:str,token: str = Header(None),db: Session = Depends(get_db)):
     if(admin_key!=ADMIN_KEY):
          raise HTTPException(status_code=500, detail="Incorrect admin key")
 
-    payload = get_user_from_token(token.token)
+    payload = get_user_from_token(token)
     print(payload)
     Email = payload.get('sub')
     
@@ -204,12 +204,12 @@ async def set_admin( token: TokenBase,admin_key:str, db: Session = Depends(get_d
     dependencies=[Depends(api_key_header)],
     tags=["Role"]
 )
-async def set_role(role: RoleBase, token: TokenBase, db: Session = Depends(get_db)):
+async def set_role(role: RoleBase, token: str = Header(None), db: Session = Depends(get_db)):
     if(role.role=="admin"):
         raise HTTPException(status_code=404, detail="Cannot set admin via this route, use set-admin route")
 
 
-    payload = get_user_from_token(token.token)
+    payload = get_user_from_token(token)
     print(payload)
     Email = payload.get('sub')
    
@@ -242,13 +242,14 @@ async def set_role(role: RoleBase, token: TokenBase, db: Session = Depends(get_d
     "/users/",
     response_model=List[UserBase],
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(api_key_header),Depends(token_key_header)],
+    dependencies=[Depends(api_key_header)],
     tags=["User"]
 )
-async def get_all_users(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_users(token: str = Header(None) , db: Session = Depends(get_db)):
     users = db.query(models.User).all()
-    payload=get_user_from_token(token.token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    
+    payload=get_user_from_token(token)
+    message = f"New action performed by user.\nName: {payload.get('sub')}"
     send_telegram_message(message)
     return users
 
@@ -270,7 +271,7 @@ async def get_all_users(token: TokenBase, db: Session = Depends(get_db)):
     dependencies=[Depends(api_key_header)],
     tags=["Rice -mill"]
 )
-async def add_rice_mill(addricemill: AddRiceMillBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_rice_mill(addricemill: AddRiceMillBase, token: str = Header(None), db: Session = Depends(get_db)):
     existing_rice_mill = (
         db.query(models.Add_Rice_Mill)
         .filter(models.Add_Rice_Mill.rice_mill_id == addricemill.rice_mill_id)
@@ -285,7 +286,7 @@ async def add_rice_mill(addricemill: AddRiceMillBase, token: TokenBase, db: Sess
     db.add(db_about_rice_mill)
     db.commit()
     db.refresh(db_about_rice_mill)
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
 
@@ -301,9 +302,9 @@ async def add_rice_mill(addricemill: AddRiceMillBase, token: TokenBase, db: Sess
     dependencies=[Depends(api_key_header)],
     tags=["Rice -mill"]
 )
-async def rice_mill_data(token: TokenBase, db: Session = Depends(get_db)):
+async def rice_mill_data(token: str = Header(None), db: Session = Depends(get_db)):
     db_rice_mill_data = db.query(models.Add_Rice_Mill).distinct().all()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_rice_mill_data
@@ -318,7 +319,7 @@ async def rice_mill_data(token: TokenBase, db: Session = Depends(get_db)):
 
 )
 async def add_new_trasporter(
-    transporters: TransporterBase, token: TokenBase, db: Session = Depends(get_db)
+    transporters: TransporterBase, token: str = Header(None), db: Session = Depends(get_db)
 ):
     existing_transporter = (
         db.query(models.Transporter)
@@ -338,7 +339,7 @@ async def add_new_trasporter(
     db.commit()
     db.refresh(db_transporter)
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_transporter
@@ -352,9 +353,9 @@ async def add_new_trasporter(
     dependencies=[Depends(api_key_header)],
     tags=["Transporter"]
 )
-async def get_all_transporters(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_transporters(token: str = Header(None), db: Session = Depends(get_db)):
     transporters = db.query(models.Transporter).distinct().all()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return transporters
@@ -368,7 +369,7 @@ async def get_all_transporters(token: TokenBase, db: Session = Depends(get_db)):
     tags=["Truck"]
 
 )
-async def add_new_truck(truck: TruckBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_new_truck(truck: TruckBase, token: str = Header(None), db: Session = Depends(get_db)):
     existing_truck = (
         db.query(models.Truck)
         .filter(models.Truck.truck_id == truck.truck_id)
@@ -383,7 +384,7 @@ async def add_new_truck(truck: TruckBase, token: TokenBase, db: Session = Depend
     db_truck = models.Truck(**truck.dict())
     db.add(db_truck)
     db.commit()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return truck
@@ -399,7 +400,7 @@ async def add_new_truck(truck: TruckBase, token: TokenBase, db: Session = Depend
     tags=["Truck"]
 
 )
-async def get_all_truck_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_truck_data(token: str = Header(None), db: Session = Depends(get_db)):
     trucks = db.query(models.Truck).options(models.Truck.transporter).all()
 
     result = []
@@ -413,7 +414,7 @@ async def get_all_truck_data(token: TokenBase, db: Session = Depends(get_db)):
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -428,9 +429,9 @@ async def get_all_truck_data(token: TokenBase, db: Session = Depends(get_db)):
     tags=["Truck"]
 
 )
-async def get_truck_numbers(token: TokenBase, db: Session = Depends(get_db)):
+async def get_truck_numbers(token: str = Header(None), db: Session = Depends(get_db)):
     db_truck_numbers = db.query(models.Truck.truck_number).distinct().all()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return [truck_number[0] for truck_number in db_truck_numbers]
@@ -444,7 +445,7 @@ async def get_truck_numbers(token: TokenBase, db: Session = Depends(get_db)):
         tags=["Society"]
 
 )
-async def add_society(addsociety: SocietyBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_society(addsociety: SocietyBase, token: str = Header(None), db: Session = Depends(get_db)):
     existing_society = (
         db.query(models.Society)
         .filter(models.Society.society_id == addsociety.society_id)
@@ -460,7 +461,7 @@ async def add_society(addsociety: SocietyBase, token: TokenBase, db: Session = D
     db.commit()
     db.refresh(db_society)
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_society
@@ -475,9 +476,9 @@ async def add_society(addsociety: SocietyBase, token: TokenBase, db: Session = D
     tags=["Society"]
 
 )
-async def get_all_society_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_society_data(token: str = Header(None), db: Session = Depends(get_db)):
     societys = db.query(models.Society).distinct().all()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return societys
@@ -492,9 +493,9 @@ async def get_all_society_data(token: TokenBase, db: Session = Depends(get_db)):
     tags=["Society"]
 
 )
-async def get_all_societyes_names(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_societyes_names(token: str = Header(None), db: Session = Depends(get_db)):
     db_get_all_societyes_names = db.query(models.Society.society_name).distinct().all()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return [all_society_name[0] for all_society_name in db_get_all_societyes_names]
@@ -509,7 +510,7 @@ async def get_all_societyes_names(token: TokenBase, db: Session = Depends(get_db
     tags=["Society"]
 
 )
-async def society_data(society_id: int, token: TokenBase, db: Session = Depends(get_db)):
+async def society_data(society_id: int, token: str = Header(None), db: Session = Depends(get_db)):
     society_transporting = (
         db.query(models.Society).filter_by(society_id=society_id).all()
     )
@@ -519,7 +520,7 @@ async def society_data(society_id: int, token: TokenBase, db: Session = Depends(
             SocietyBase(**row.__dict__) for row in society_transporting
         ],
     }
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return society_transporting_data
@@ -538,7 +539,7 @@ async def society_data(society_id: int, token: TokenBase, db: Session = Depends(
 )
     
 
-async def add_agreement(addagreement: AgreementBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_agreement(addagreement: AgreementBase, token: str = Header(None), db: Session = Depends(get_db)):
     existing_agreement = (
         db.query(models.Agreement)
         .filter(models.Agreement.agremennt_id == addagreement.agremennt_id)
@@ -554,7 +555,7 @@ async def add_agreement(addagreement: AgreementBase, token: TokenBase, db: Sessi
     db.commit()
     db.refresh(db_agreement)
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_agreement
@@ -564,9 +565,9 @@ async def add_agreement(addagreement: AgreementBase, token: TokenBase, db: Sessi
 # @app.get(
 #     "/agreements/", response_model=List[AgreementBase], status_code=status.HTTP_200_OK
 # )
-# async def get_all_agreement_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def get_all_agreement_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     agreements = db.query(models.Agreement).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return agreements
@@ -580,7 +581,7 @@ async def add_agreement(addagreement: AgreementBase, token: TokenBase, db: Sessi
     tags=["Agreement"]
 
 )
-async def get_all_agreements_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_agreements_data(token: str = Header(None), db: Session = Depends(get_db)):
     agreements = (
         db.query(models.Agreement)
         .options(joinedload(models.Agreement.addricemill))
@@ -601,7 +602,7 @@ async def get_all_agreements_data(token: TokenBase, db: Session = Depends(get_db
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -616,7 +617,7 @@ async def get_all_agreements_data(token: TokenBase, db: Session = Depends(get_db
     tags=["Agreement"]
 
 )
-async def get_all_agreements_number(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_agreements_number(token: str = Header(None), db: Session = Depends(get_db)):
      agreements = (
         db.query(models.Agreement)
         .options(joinedload(models.Agreement.agreement_number))
@@ -637,7 +638,7 @@ async def get_all_agreements_number(token: TokenBase, db: Session = Depends(get_
             )
         )
 
-        payload=get_user_from_token(token.token)
+        payload=get_user_from_token(token)
         message = f"New action performed by user.\nName: {payload.sub} "
         send_telegram_message(message)
         return result
@@ -645,7 +646,7 @@ async def get_all_agreements_number(token: TokenBase, db: Session = Depends(get_
 
 # @app.post("/create_role/",
 #            tags=["Role "],)
-# def Assign_role(user: RoleBase, token: TokenBase, db: Session = Depends(get_db)):
+# def Assign_role(user: RoleBase, token: str = Header(None), db: Session = Depends(get_db)):
 #     hashed_password = hash_password(user.password)
 #     db_user = models.User(name=user.name, email=user.email, password=hashed_password,role=user.role)
 
@@ -662,7 +663,7 @@ async def get_all_agreements_number(token: TokenBase, db: Session = Depends(get_
 
 #     # Send Telegram message
    
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
 #     message = f"New action performed by user.\nName: {payload.sub} "
 #     send_telegram_message(message)
 #     return {"message": "User created successfully", "user": db_user}
@@ -730,7 +731,7 @@ def login_user(request: LoginRequestBase, db: Session = Depends(get_db)):
     tags=["Warehouse"]
 )
 async def add_ware_house(
-    warehouse: WareHouseTransporting, token: TokenBase, db: Session = Depends(get_db)
+    warehouse: WareHouseTransporting, token: str = Header(None), db: Session = Depends(get_db)
 ):
     existing_warehouse = (
         db.query(models.ware_house_transporting)
@@ -750,7 +751,7 @@ async def add_ware_house(
     db.commit()
     db.refresh(db_add_ware_house)
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_add_ware_house
@@ -764,9 +765,9 @@ async def add_ware_house(
     tags=["Warehouse"],
 
 )
-async def get_all_ware_house_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_ware_house_data(token: str = Header(None), db: Session = Depends(get_db)):
     ware_house_db = db.query(models.ware_house_transporting).distinct().all()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return ware_house_db
@@ -780,7 +781,7 @@ async def get_all_ware_house_data(token: TokenBase, db: Session = Depends(get_db
     tags=["Kochia"]
 
 )
-async def add_kochia(addkochia: KochiaBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_kochia(addkochia: KochiaBase, token: str = Header(None), db: Session = Depends(get_db)):
     existing_kochia = (
         db.query(models.Kochia)
         .filter(models.Kochia.kochia_id == addkochia.kochia_id)
@@ -797,7 +798,7 @@ async def add_kochia(addkochia: KochiaBase, token: TokenBase, db: Session = Depe
     db.commit()
     db.refresh(db_kochia)
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_kochia
@@ -806,9 +807,9 @@ async def add_kochia(addkochia: KochiaBase, token: TokenBase, db: Session = Depe
 # @app.get(
 #     "/kochia-data/", response_model=List[KochiaBase], status_code=status.HTTP_200_OK
 # )
-# async def kochia_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def kochia_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_kochia_data = db.query(models.Kochia).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_kochia_data
@@ -822,7 +823,7 @@ async def add_kochia(addkochia: KochiaBase, token: TokenBase, db: Session = Depe
     tags=["Kochia"]
 
 )
-async def get_all_kochia_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_kochia_data(token: str = Header(None), db: Session = Depends(get_db)):
     kochias = (
         db.query(models.Kochia).options(joinedload(models.Kochia.addricemill)).all()
     )
@@ -839,7 +840,7 @@ async def get_all_kochia_data(token: TokenBase, db: Session = Depends(get_db)):
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -852,7 +853,7 @@ async def get_all_kochia_data(token: TokenBase, db: Session = Depends(get_db)):
     dependencies=[Depends(api_key_header)],
     tags=['Party'],
 )
-async def add_party(party: PartyBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_party(party: PartyBase, token: str = Header(None), db: Session = Depends(get_db)):
     existing_party = (
         db.query(models.Party)
         .filter(models.Party.party_id == party.party_id)
@@ -866,7 +867,7 @@ async def add_party(party: PartyBase, token: TokenBase, db: Session = Depends(ge
     db_add_party = models.Party(**party.dict())
     db.add(db_add_party)
     db.commit()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return party
@@ -880,9 +881,9 @@ async def add_party(party: PartyBase, token: TokenBase, db: Session = Depends(ge
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_party_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_party_data(token: str = Header(None), db: Session = Depends(get_db)):
     db_party_data = db.query(models.Party).distinct().all()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_party_data
@@ -895,7 +896,7 @@ async def get_party_data(token: TokenBase, db: Session = Depends(get_db)):
     dependencies=[Depends(api_key_header)],
     tags=['Broker']
 )
-async def add_broker(broker:  BrokerBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_broker(broker:  BrokerBase, token: str = Header(None), db: Session = Depends(get_db)):
     existing_broker = (
         db.query(models.brokers)
         .filter(models.brokers.broker_phone_number == broker.broker_phone_number)
@@ -911,7 +912,7 @@ async def add_broker(broker:  BrokerBase, token: TokenBase, db: Session = Depend
     db.commit()
     db.refresh(db_add_broker)
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_add_broker
@@ -925,9 +926,9 @@ async def add_broker(broker:  BrokerBase, token: TokenBase, db: Session = Depend
     tags=['Broker']
 
 )
-async def get_broker_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_broker_data(token: str = Header(None), db: Session = Depends(get_db)):
     db_broker_data = db.query(models.brokers).distinct().all()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_broker_data
@@ -940,7 +941,7 @@ async def get_broker_data(token: TokenBase, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_data(token: str = Header(None), db: Session = Depends(get_db)):
     # Fetch data from different tables
     rice_mill_data = db.query(models.Add_Rice_Mill).all()
     agreement_data = db.query(models.Agreement).all()
@@ -955,7 +956,7 @@ async def get_data(token: TokenBase, db: Session = Depends(get_db)):
         "society_data": [SocietyBase(**row.__dict__) for row in society_data],
     }
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return response_data
@@ -968,7 +969,7 @@ async def get_data(token: TokenBase, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def adddodata(rice_mill_id: int, token: TokenBase, db: Session = Depends(get_db)):
+async def adddodata(rice_mill_id: int, token: str = Header(None), db: Session = Depends(get_db)):
     rice_mill_data = (
         db.query(models.Add_Rice_Mill).filter_by(rice_mill_id=rice_mill_id).all()
     )
@@ -982,7 +983,7 @@ async def adddodata(rice_mill_id: int, token: TokenBase, db: Session = Depends(g
         "agreement_data": [AgreementBase(**row.__dict__) for row in agreement_data],
     }
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return adddo_data
@@ -994,7 +995,7 @@ async def adddodata(rice_mill_id: int, token: TokenBase, db: Session = Depends(g
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def add_do(adddo: AddDoBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_do(adddo: AddDoBase, token: str = Header(None), db: Session = Depends(get_db)):
     existing_adddo = (
         db.query(models.Add_Do)
         .filter(models.Add_Do.do_number == adddo.do_number)
@@ -1010,7 +1011,7 @@ async def add_do(adddo: AddDoBase, token: TokenBase, db: Session = Depends(get_d
     db.commit()
     db.refresh(db_add_do)
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_add_do
@@ -1019,9 +1020,9 @@ async def add_do(adddo: AddDoBase, token: TokenBase, db: Session = Depends(get_d
 # @app.get(
 #     "/add-do-data/", response_model=List[AddDoBase], status_code=status.HTTP_200_OK
 # )
-# async def get_all_add_do_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def get_all_add_do_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     add_do = db.query(models.Add_Do).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return add_do
@@ -1033,7 +1034,7 @@ async def add_do(adddo: AddDoBase, token: TokenBase, db: Session = Depends(get_d
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_add_do_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_add_do_data(token: str = Header(None), db: Session = Depends(get_db)):
     Add_Dos = (
         db.query(models.Add_Do)
         .options(
@@ -1072,7 +1073,7 @@ async def get_all_add_do_data(token: TokenBase, db: Session = Depends(get_db)):
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -1087,7 +1088,7 @@ async def get_all_add_do_data(token: TokenBase, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def rice_do_number_data(rice_mill_id: int, token: TokenBase, db: Session = Depends(get_db)):
+async def rice_do_number_data(rice_mill_id: int, token: str = Header(None), db: Session = Depends(get_db)):
     rice_mill_data = (
         db.query(models.Add_Rice_Mill).filter_by(rice_mill_id=rice_mill_id).all()
     )
@@ -1098,7 +1099,7 @@ async def rice_do_number_data(rice_mill_id: int, token: TokenBase, db: Session =
         "rice_mill_data": [AddRiceMillBase(**row.__dict__) for row in rice_mill_data],
         "do_number_data": [AddDoBase(**row.__dict__) for row in do_number_data],
     }
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return dhan_awak
@@ -1110,7 +1111,7 @@ async def rice_do_number_data(rice_mill_id: int, token: TokenBase, db: Session =
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def Dhan_awak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def Dhan_awak_data(token: str = Header(None), db: Session = Depends(get_db)):
     rice_mill_data = db.query(models.Add_Rice_Mill).all()
     do_number_data = db.query(models.Add_Do).all()
     society_data = db.query(models.Society).all()
@@ -1126,7 +1127,7 @@ async def Dhan_awak_data(token: TokenBase, db: Session = Depends(get_db)):
             TransporterBase(**row.__dict__) for row in transporter_data
         ],
     }
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return dhan_awak_data
@@ -1139,7 +1140,7 @@ async def Dhan_awak_data(token: TokenBase, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def truck_transporter_data(transport_id: int, token: TokenBase, db: Session = Depends(get_db)):
+async def truck_transporter_data(transport_id: int, token: str = Header(None), db: Session = Depends(get_db)):
     truck_data = db.query(models.Truck).filter_by(transport_id=transport_id).all()
     transporter_data = (
         db.query(models.Transporter).filter_by(transporter_id=transport_id).all()
@@ -1150,7 +1151,7 @@ async def truck_transporter_data(transport_id: int, token: TokenBase, db: Sessio
             TransporterBase(**row.__dict__) for row in transporter_data
         ],
     }
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return dhan_awak_truck_transporter
@@ -1162,7 +1163,7 @@ async def truck_transporter_data(transport_id: int, token: TokenBase, db: Sessio
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def add_dhan_awak(dhanawak: DhanAwakBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_dhan_awak(dhanawak: DhanAwakBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_dhan_awak = models.Dhan_Awak(**dhanawak.dict())
     db.add(db_dhan_awak)
     db.commit()
@@ -1173,9 +1174,9 @@ async def add_dhan_awak(dhanawak: DhanAwakBase, token: TokenBase, db: Session = 
 #     response_model=List[DhanAwakBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def get_dhan_awak(token: TokenBase, db: Session = Depends(get_db)):
+# async def get_dhan_awak(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_dhan_awak_data = db.query(models.Dhan_Awak).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     # message = f"New action/
 
 @app.get(
@@ -1184,7 +1185,7 @@ async def add_dhan_awak(dhanawak: DhanAwakBase, token: TokenBase, db: Session = 
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_dhan_awak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_dhan_awak_data(token: str = Header(None), db: Session = Depends(get_db)):
     dhan_awaks_data = (
         db.query(models.Dhan_Awak)
         .options(
@@ -1239,7 +1240,7 @@ async def get_all_dhan_awak_data(token: TokenBase, db: Session = Depends(get_db)
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -1252,7 +1253,7 @@ async def get_all_dhan_awak_data(token: TokenBase, db: Session = Depends(get_db)
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def broken_data(token: TokenBase, db: Session = Depends(get_db)):
+async def broken_data(token: str = Header(None), db: Session = Depends(get_db)):
     rice_mill_data = db.query(models.Add_Rice_Mill).all()
     truck_data = db.query(models.Truck).all()
     party_data = db.query(models.Party).all()
@@ -1264,7 +1265,7 @@ async def broken_data(token: TokenBase, db: Session = Depends(get_db)):
         "party_data": [PartyBase(**row.__dict__) for row in party_data],
         "brokers_data": [BrokerBase(**row.__dict__) for row in brokers_data],
     }
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return broken_data
@@ -1276,7 +1277,7 @@ async def broken_data(token: TokenBase, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def add_other_awak(otherawak: OtherAwakBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_other_awak(otherawak: OtherAwakBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_add_other_awak = models.Other_awak(**otherawak.dict())
     db.add(db_add_other_awak)
     db.commit()
@@ -1287,7 +1288,7 @@ async def add_other_awak(otherawak: OtherAwakBase, token: TokenBase, db: Session
 #     response_model=List[OtherAwakBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def get_other_awak_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def get_other_awak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_awak_data = db.query(models.other_awak).distinct().all()
 #     payload=get_user_from_to/
 
@@ -1297,7 +1298,7 @@ async def add_other_awak(otherawak: OtherAwakBase, token: TokenBase, db: Session
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_other_awak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_other_awak_data(token: str = Header(None), db: Session = Depends(get_db)):
     other_awaks = (
         db.query(models.Other_awak)
         .options(
@@ -1328,7 +1329,7 @@ async def get_all_other_awak_data(token: TokenBase, db: Session = Depends(get_db
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -1341,7 +1342,7 @@ async def get_all_other_awak_data(token: TokenBase, db: Session = Depends(get_db
 #     status_code=status.HTTP_200_OK,
 #     dependencies=[Depends(api_key_header)],
 # )
-async def warehouse_data(warehouse_id: int, token: TokenBase, db: Session = Depends(get_db)):
+async def warehouse_data(warehouse_id: int, token: str = Header(None), db: Session = Depends(get_db)):
     warehouse_data = (
         db.query(models.ware_house_transporting)
         .filter_by(ware_house_id=warehouse_id)  # Ensure this matches the model
@@ -1355,7 +1356,7 @@ async def warehouse_data(warehouse_id: int, token: TokenBase, db: Session = Depe
         "ware_house_transporting_rate": warehouse_data.ware_house_transporting_rate,
         "hamalirate": warehouse_data.hamalirate,
     }
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return response_data
@@ -1368,7 +1369,7 @@ async def warehouse_data(warehouse_id: int, token: TokenBase, db: Session = Depe
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def rice_deposit_data(token: TokenBase, db: Session = Depends(get_db)):
+async def rice_deposit_data(token: str = Header(None), db: Session = Depends(get_db)):
     rice_mill_data = db.query(models.Add_Rice_Mill).all()
     truck_data = db.query(models.Truck).all()
     transporter_data = db.query(models.Transporter).all()
@@ -1384,7 +1385,7 @@ async def rice_deposit_data(token: TokenBase, db: Session = Depends(get_db)):
             WareHouseTransporting(**row.__dict__) for row in ware_house_data
         ],
     }
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return rice_deposit_data
@@ -1396,7 +1397,7 @@ async def rice_deposit_data(token: TokenBase, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def rice_deposite(ricedeposite: RiceDepositeBase, token: TokenBase, db: Session = Depends(get_db)):
+async def rice_deposite(ricedeposite: RiceDepositeBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_rice_depostie = models.Rice_deposite(**ricedeposite.dict())
     db.add(db_rice_depostie)
     db.commit()
@@ -1407,9 +1408,9 @@ async def rice_deposite(ricedeposite: RiceDepositeBase, token: TokenBase, db: Se
 #     response_model=List[RiceDepositeBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def rice_deposite_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def rice_deposite_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_rice_deposite_data = db.query(models.Rice_deposite).distinct().all()
-# #     payload=get_user_from_token(token.token)
+# #     payload=get_user_from_token(token)
 #     message = f"New action performed by user.\nName: {payload.sub} "
 #     send_telegram_message(message)
 #     return db_rice_deposite_data
@@ -1421,7 +1422,7 @@ async def rice_deposite(ricedeposite: RiceDepositeBase, token: TokenBase, db: Se
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_rice_deposite_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_rice_deposite_data(token: str = Header(None), db: Session = Depends(get_db)):
     rices_deposite = (
         db.query(models.Rice_deposite)
         .options(
@@ -1472,7 +1473,7 @@ async def get_all_rice_deposite_data(token: TokenBase, db: Session = Depends(get
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -1485,7 +1486,7 @@ async def get_all_rice_deposite_data(token: TokenBase, db: Session = Depends(get
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def dalali_dhaan(dalalidhaan: DalaliDhaanBase, token: TokenBase, db: Session = Depends(get_db)):
+async def dalali_dhaan(dalalidhaan: DalaliDhaanBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_dalali_dhaan = models.Dalali_dhaan(**dalalidhaan.dict())
     db.add(db_dalali_dhaan)
     db.commit()
@@ -1496,9 +1497,9 @@ async def dalali_dhaan(dalalidhaan: DalaliDhaanBase, token: TokenBase, db: Sessi
 #     response_model=List[DalaliDhaanBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def dalali_dhaan_data_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def dalali_dhaan_data_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_dalali_dhaan_data_data = db.query(models.Dalali_dhaan).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     # message = f"New action performed by user.\nName: {payload.sub} "
     # send_telegram_message(message)
     # return db_dalali_dhaan_data_data
@@ -1510,7 +1511,7 @@ async def dalali_dhaan(dalalidhaan: DalaliDhaanBase, token: TokenBase, db: Sessi
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_dalali_dhaan_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_dalali_dhaan_data(token: str = Header(None), db: Session = Depends(get_db)):
     Dalali_dhaans = (
         db.query(models.Dalali_dhaan)
         .options(
@@ -1554,7 +1555,7 @@ async def get_all_dalali_dhaan_data(token: TokenBase, db: Session = Depends(get_
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -1569,16 +1570,16 @@ async def get_all_dalali_dhaan_data(token: TokenBase, db: Session = Depends(get_
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def frk(frk: FrkBase, token: TokenBase, db: Session = Depends(get_db)):
+async def frk(frk: FrkBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_frk = models.Frk(**frk.dict())
     db.add(db_frk)
     db.commit()
 
 
 # @app.get("/frk-data/", response_model=List[FrkBase], status_code=status.HTTP_200_OK)
-# async def frk_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def frk_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_frk_data = db.query(models.Frk).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     # message = f"New action performed by user.\nName: {payload.sub} "
     # send_telegram_message(message)
     # return db_frk_data
@@ -1589,7 +1590,7 @@ async def frk(frk: FrkBase, token: TokenBase, db: Session = Depends(get_db)):
     response_model=List[FrkWithRiceTruck],
     status_code=status.HTTP_200_OK,
 )
-async def get_all_add_do_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_add_do_data(token: str = Header(None), db: Session = Depends(get_db)):
     frks = (
         db.query(models.Frk)
         .options(
@@ -1618,7 +1619,7 @@ async def get_all_add_do_data(token: TokenBase, db: Session = Depends(get_db)):
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -1633,7 +1634,7 @@ async def get_all_add_do_data(token: TokenBase, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def sauda_patrak(saudapatrak: SaudaPatrakBase, token: TokenBase, db: Session = Depends(get_db)):
+async def sauda_patrak(saudapatrak: SaudaPatrakBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_sauda_patrak = models.Sauda_patrak(**saudapatrak.dict())
     db.add(db_sauda_patrak)
     db.commit()
@@ -1644,9 +1645,9 @@ async def sauda_patrak(saudapatrak: SaudaPatrakBase, token: TokenBase, db: Sessi
 #     response_model=List[SaudaPatrakBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def sauda_patrak_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def sauda_patrak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_sauda_patrak_data = db.query(models.Sauda_patrak).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     # message = f"New action performed by user.\nName: {payload.sub} "
     # send_telegram_message(message)
     # return db_sauda_patrak_data
@@ -1658,7 +1659,7 @@ async def sauda_patrak(saudapatrak: SaudaPatrakBase, token: TokenBase, db: Sessi
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_sauda_patrak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_sauda_patrak_data(token: str = Header(None), db: Session = Depends(get_db)):
     saudas_patrak = (
         db.query(models.Sauda_patrak)
         .options(
@@ -1684,7 +1685,7 @@ async def get_all_sauda_patrak_data(token: TokenBase, db: Session = Depends(get_
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -1697,7 +1698,7 @@ async def get_all_sauda_patrak_data(token: TokenBase, db: Session = Depends(get_
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def do_panding(dopanding: DoPendingBase, token: TokenBase, db: Session = Depends(get_db)):
+async def do_panding(dopanding: DoPendingBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_do_panding = models.Do_panding(**dopanding.dict())
     db.add(db_do_panding)
     db.commit()
@@ -1708,7 +1709,7 @@ async def do_panding(dopanding: DoPendingBase, token: TokenBase, db: Session = D
 #     response_model=List[DoPendingBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def do_panding_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def do_panding_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_do_panding_data = db.query(models.Do_panding).distinct().all()
 #     payload=get_user_from/
 
@@ -1718,7 +1719,7 @@ async def do_panding(dopanding: DoPendingBase, token: TokenBase, db: Session = D
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_sauda_patrak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_sauda_patrak_data(token: str = Header(None), db: Session = Depends(get_db)):
     dos_pending = (
         db.query(models.Do_panding)
         .options(
@@ -1745,7 +1746,7 @@ async def get_all_sauda_patrak_data(token: TokenBase, db: Session = Depends(get_
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -1759,7 +1760,7 @@ async def get_all_sauda_patrak_data(token: TokenBase, db: Session = Depends(get_
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def dhan_transporting_data(token: TokenBase, db: Session = Depends(get_db)):
+async def dhan_transporting_data(token: str = Header(None), db: Session = Depends(get_db)):
     rice_mill_data = db.query(models.Add_Rice_Mill).all()
     rst_data = db.query(models.Dhan_Awak).all()
     do_number_data = db.query(models.Add_Do).all()
@@ -1777,7 +1778,7 @@ async def dhan_transporting_data(token: TokenBase, db: Session = Depends(get_db)
             TransporterBase(**row.__dict__) for row in transporter_data
         ],
     }
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return dhan_transporting_data
@@ -1789,7 +1790,7 @@ async def dhan_transporting_data(token: TokenBase, db: Session = Depends(get_db)
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def rice_mill_rst_number(rice_mill_id: int, token: TokenBase, db: Session = Depends(get_db)):
+async def rice_mill_rst_number(rice_mill_id: int, token: str = Header(None), db: Session = Depends(get_db)):
     rice_mill_data = (
         db.query(models.Add_Rice_Mill).filter_by(rice_mill_id=rice_mill_id).all()
     )
@@ -1802,7 +1803,7 @@ async def rice_mill_rst_number(rice_mill_id: int, token: TokenBase, db: Session 
         "do_number_data": [AddDoBase(**row.__dict__) for row in do_number_data],
         "rst_data": [DhanAwakBase(**row.__dict__) for row in rst_data],
     }
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return rice_mill_rst_number
@@ -1815,7 +1816,7 @@ async def rice_mill_rst_number(rice_mill_id: int, token: TokenBase, db: Session 
     dependencies=[Depends(api_key_header)],
 )
 async def dhan_transporting(
-    dhantransporting: DhanTransportingBase, token: TokenBase, db: Session = Depends(get_db)
+    dhantransporting: DhanTransportingBase, token: str = Header(None), db: Session = Depends(get_db)
 ):
     db_dhan_transporting = models.Dhan_transporting(**dhantransporting.dict())
     db.add(db_dhan_transporting)
@@ -1827,9 +1828,9 @@ async def dhan_transporting(
 #     response_model=List[DhanTransportingBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def dhan_transporting_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def dhan_transporting_data(token: str = Header(None), db: Session = Depends(get_db)):
 # #     db_dhan_transporting_data = db.query(models.Dhan_transporting).distinct().all()
-# #     payload=get_user_from_token(token.token)
+# #     payload=get_user_from_token(token)
 #     message = f"New action performed by user.\nName: {payload.sub} "
 #     send_telegram_message(message)
 #     return db_dhan_transporting_data
@@ -1841,7 +1842,7 @@ async def dhan_transporting(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_sauda_patrak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_sauda_patrak_data(token: str = Header(None), db: Session = Depends(get_db)):
     dhans_transporting = (
         db.query(models.Dhan_transporting)
         .options(
@@ -1884,7 +1885,7 @@ async def get_all_sauda_patrak_data(token: TokenBase, db: Session = Depends(get_
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -1897,7 +1898,7 @@ async def get_all_sauda_patrak_data(token: TokenBase, db: Session = Depends(get_
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def add_other_jawak(otherjawak: OtherJawakBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_other_jawak(otherjawak: OtherJawakBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_add_other_jawak = models.Other_jawak(**otherjawak.dict())
     db.add(db_add_other_jawak)
     db.commit()
@@ -1908,9 +1909,9 @@ async def add_other_jawak(otherjawak: OtherJawakBase, token: TokenBase, db: Sess
 #     response_model=List[OtherJawakBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def get_other_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def get_other_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_jawak_data = db.query(models.Other_jawak).distinct().all()
-# #     payload=get_user_from_token(token.token)
+# #     payload=get_user_from_token(token)
 #     message = f"New action performed by user.\nName: {payload.sub} "
 #     send_telegram_message(message)
 #     return db_get_other_jawak_data
@@ -1922,7 +1923,7 @@ async def add_other_jawak(otherjawak: OtherJawakBase, token: TokenBase, db: Sess
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_other_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_other_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
     other_jawaks = (
         db.query(models.Other_jawak)
         .options(
@@ -1953,7 +1954,7 @@ async def get_all_other_jawak_data(token: TokenBase, db: Session = Depends(get_d
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -1966,7 +1967,7 @@ async def get_all_other_jawak_data(token: TokenBase, db: Session = Depends(get_d
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def add_broken_jawak(brokenjawak: BrokenJawak, token: TokenBase, db: Session = Depends(get_db)):
+async def add_broken_jawak(brokenjawak: BrokenJawak, token: str = Header(None), db: Session = Depends(get_db)):
     db_add_broken_jawak = models.broken_jawak(**brokenjawak.dict())
     db.add(db_add_broken_jawak)
     db.commit()
@@ -1977,9 +1978,9 @@ async def add_broken_jawak(brokenjawak: BrokenJawak, token: TokenBase, db: Sessi
 #     response_model=List[BrokenJawak],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def get_other_broken_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def get_other_broken_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_broken_jawak_data = db.query(models.broken_jawak).distinct().all()
-# #     payload=get_user_from_token(token.token)
+# #     payload=get_user_from_token(token)
 #     message = f"New action performed by user.\nName: {payload.sub} "
 #     send_telegram_message(message)
 #     return db_get_other_broken_jawak_data
@@ -1991,7 +1992,7 @@ async def add_broken_jawak(brokenjawak: BrokenJawak, token: TokenBase, db: Sessi
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_other_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_other_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
     brokens_jawak = (
         db.query(models.broken_jawak)
         .options(
@@ -2034,7 +2035,7 @@ async def get_all_other_jawak_data(token: TokenBase, db: Session = Depends(get_d
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -2049,7 +2050,7 @@ async def get_all_other_jawak_data(token: TokenBase, db: Session = Depends(get_d
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def add_husk_jawak(huskjawak: HuskJawakBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_husk_jawak(huskjawak: HuskJawakBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_add_husk_jawak = models.husk_jawak(**huskjawak.dict())
     db.add(db_add_husk_jawak)
     db.commit()
@@ -2060,9 +2061,9 @@ async def add_husk_jawak(huskjawak: HuskJawakBase, token: TokenBase, db: Session
 #     response_model=List[HuskJawakBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def get_other_husk_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def get_other_husk_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_husk_jawak_data = db.query(models.husk_jawak).distinct().all()
-# #     payload=get_user_from_token(token.token)
+# #     payload=get_user_from_token(token)
 #     message = f"New action performed by user.\nName: {payload.sub} "
 #     send_telegram_message(message)
 #     return db_get_other_husk_jawak_data
@@ -2074,7 +2075,7 @@ async def add_husk_jawak(huskjawak: HuskJawakBase, token: TokenBase, db: Session
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_husk_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_husk_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
     husks_jawak = (
         db.query(models.husk_jawak)
         .options(
@@ -2117,7 +2118,7 @@ async def get_all_husk_jawak_data(token: TokenBase, db: Session = Depends(get_db
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -2132,7 +2133,7 @@ async def get_all_husk_jawak_data(token: TokenBase, db: Session = Depends(get_db
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def add_nakkhi_jawak(nakkhijawak: NakkhiJawakBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_nakkhi_jawak(nakkhijawak: NakkhiJawakBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_add_nakkhi_jawak = models.nakkhi_jawak(**nakkhijawak.dict())
     db.add(db_add_nakkhi_jawak)
     db.commit()
@@ -2143,9 +2144,9 @@ async def add_nakkhi_jawak(nakkhijawak: NakkhiJawakBase, token: TokenBase, db: S
 #     response_model=List[NakkhiJawakBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def get_other_nakkhi_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def get_other_nakkhi_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_nakkhi_jawak_data = db.query(models.nakkhi_jawak).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     # message = f"New action performed by user.\nName: {payload.sub} "
     # send_telegram_message(message)
     # return db_get_other_nakkhi_jawak_data
@@ -2157,7 +2158,7 @@ async def add_nakkhi_jawak(nakkhijawak: NakkhiJawakBase, token: TokenBase, db: S
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_nakkhi_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_nakkhi_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
     nakkhis_jawak = (
         db.query(models.nakkhi_jawak)
         .options(
@@ -2200,7 +2201,7 @@ async def get_all_nakkhi_jawak_data(token: TokenBase, db: Session = Depends(get_
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -2215,7 +2216,7 @@ async def get_all_nakkhi_jawak_data(token: TokenBase, db: Session = Depends(get_
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def add_bran_jawak(branjawak: BranJawakBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_bran_jawak(branjawak: BranJawakBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_add_bran_jawak = models.bran_jawak(**branjawak.dict())
     db.add(db_add_bran_jawak)
     db.commit()
@@ -2226,9 +2227,9 @@ async def add_bran_jawak(branjawak: BranJawakBase, token: TokenBase, db: Session
 #     response_model=List[BranJawakBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def get_other_bran_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def get_other_bran_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_bran_jawak_data = db.query(models.bran_jawak).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     # message = f"New action performed by user.\nName: {payload.sub} "
     # send_telegram_message(message)
     # return db_get_other_bran_jawak_data
@@ -2240,7 +2241,7 @@ async def add_bran_jawak(branjawak: BranJawakBase, token: TokenBase, db: Session
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_bran_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_bran_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
     brans_jawak = (
         db.query(models.bran_jawak)
         .options(
@@ -2281,7 +2282,7 @@ async def get_all_bran_jawak_data(token: TokenBase, db: Session = Depends(get_db
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -2296,7 +2297,7 @@ async def get_all_bran_jawak_data(token: TokenBase, db: Session = Depends(get_db
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def add_bhushi(bhushi: BhushiBase, token: TokenBase, db: Session = Depends(get_db)):
+async def add_bhushi(bhushi: BhushiBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_add_bhushi = models.bhushi(**bhushi.dict())
     db.add(db_add_bhushi)
     db.commit()
@@ -2307,9 +2308,9 @@ async def add_bhushi(bhushi: BhushiBase, token: TokenBase, db: Session = Depends
 #     response_model=List[BhushiBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def get_other_bhushi_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def get_other_bhushi_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_bhushi_data = db.query(models.bhushi).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     # message = f"New action performed by user.\nName: {payload.sub} "
     # send_telegram_message(message)
     # return db_get_other_bhushi_data
@@ -2321,7 +2322,7 @@ async def add_bhushi(bhushi: BhushiBase, token: TokenBase, db: Session = Depends
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_bhushi_jawak_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_bhushi_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
     bhushiii = (
         db.query(models.bhushi)
         .options(
@@ -2352,7 +2353,7 @@ async def get_all_bhushi_jawak_data(token: TokenBase, db: Session = Depends(get_
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -2367,7 +2368,7 @@ async def get_all_bhushi_jawak_data(token: TokenBase, db: Session = Depends(get_
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def paddy_sale(paddysale: PaddySaleBase, token: TokenBase, db: Session = Depends(get_db)):
+async def paddy_sale(paddysale: PaddySaleBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_paddy_sale = models.Paddy_sale(**paddysale.dict())
     db.add(db_paddy_sale)
     db.commit()
@@ -2378,9 +2379,9 @@ async def paddy_sale(paddysale: PaddySaleBase, token: TokenBase, db: Session = D
 #     response_model=List[PaddySaleBase],
 #     status_code=status.HTTP_200_OK,
 # )
-# async def paddy_sale_data(token: TokenBase, db: Session = Depends(get_db)):
+# async def paddy_sale_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_paddy_sale_data = db.query(models.Paddy_sale).distinct().all()
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     # message = f"New action performed by user.\nName: {payload.sub} "
     # send_telegram_message(message)
     # return db_paddy_sale_data
@@ -2392,7 +2393,7 @@ async def paddy_sale(paddysale: PaddySaleBase, token: TokenBase, db: Session = D
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_paddy_sale_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_paddy_sale_data(token: str = Header(None), db: Session = Depends(get_db)):
     paddy_sales = (
         db.query(models.Paddy_sale)
         .options(
@@ -2436,7 +2437,7 @@ async def get_all_paddy_sale_data(token: TokenBase, db: Session = Depends(get_db
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -2449,7 +2450,7 @@ async def get_all_paddy_sale_data(token: TokenBase, db: Session = Depends(get_db
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def rice_purchase(ricepurchase: RicePurchaseBase, token: TokenBase, db: Session = Depends(get_db)):
+async def rice_purchase(ricepurchase: RicePurchaseBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_rice_purchase = models.Rice_Purchase(**ricepurchase.dict())
     db.add(db_rice_purchase)
     db.commit()
@@ -2461,7 +2462,7 @@ async def rice_purchase(ricepurchase: RicePurchaseBase, token: TokenBase, db: Se
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_all_rice_purchase_data(token: TokenBase, db: Session = Depends(get_db)):
+async def get_all_rice_purchase_data(token: str = Header(None), db: Session = Depends(get_db)):
     ricepurchases = (
         db.query(models.Rice_Purchase)
         .options(
@@ -2494,7 +2495,7 @@ async def get_all_rice_purchase_data(token: TokenBase, db: Session = Depends(get
             )
         )
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return result
@@ -2507,7 +2508,7 @@ async def get_all_rice_purchase_data(token: TokenBase, db: Session = Depends(get
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(api_key_header)],
 )
-async def cash_in_out(cash_in_out: CashInCashOutBase, token: TokenBase, db: Session = Depends(get_db)):
+async def cash_in_out(cash_in_out: CashInCashOutBase, token: str = Header(None), db: Session = Depends(get_db)):
     db_cash_in_out = models.CashInCashOut(**cash_in_out.dict())
     db.add(db_cash_in_out)
     db.commit()
@@ -2519,9 +2520,9 @@ async def cash_in_out(cash_in_out: CashInCashOutBase, token: TokenBase, db: Sess
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def cash_in_out_data(token: TokenBase, db: Session = Depends(get_db)):
+async def cash_in_out_data(token: str = Header(None), db: Session = Depends(get_db)):
     db_cash_in_out_data = db.query(models.CashInCashOut).distinct().all()
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return db_cash_in_out_data
@@ -2532,7 +2533,7 @@ async def cash_in_out_data(token: TokenBase, db: Session = Depends(get_db)):
 # Dhan rice societies rate
 @app.post("/dhan-rice-societies-rate/", status_code=status.HTTP_201_CREATED)
 async def dhan_rice_societies_rate(
-    dhansocietiesrate: DhanRiceSocietiesRateBase, token: TokenBase, db: Session = Depends(get_db)
+    dhansocietiesrate: DhanRiceSocietiesRateBase, token: str = Header(None), db: Session = Depends(get_db)
 ):
     db_dhan_rice_societies_rate = models.Dhan_rice_societies_rate(
         **dhansocietiesrate.dict()
@@ -2546,7 +2547,7 @@ async def dhan_rice_societies_rate(
 # # lot number master
 @app.post("/lot-number-master/", status_code=status.HTTP_201_CREATED)
 async def lot_number_master(
-    lotnumbermaster: LotNumberMasterBase, token: TokenBase, db: Session = Depends(get_db)
+    lotnumbermaster: LotNumberMasterBase, token: str = Header(None), db: Session = Depends(get_db)
 ):
     db_lot_number_master = models.Lot_number_master(**lotnumbermaster.dict())
     db.add(db_lot_number_master)
@@ -2557,7 +2558,7 @@ async def lot_number_master(
 # Mohan food paddy
 @app.post("/mohan-food-paddy/", status_code=status.HTTP_201_CREATED)
 async def mohan_food_paddy(
-    mohanfoodpaddy: MohanFoodPaddyBase, token: TokenBase, db: Session = Depends(get_db)
+    mohanfoodpaddy: MohanFoodPaddyBase, token: str = Header(None), db: Session = Depends(get_db)
 ):
     db_mohan_food_paddy = models.Mohan_food_paddy(**mohanfoodpaddy.dict())
     db.add(db_mohan_food_paddy)
@@ -2568,7 +2569,7 @@ async def mohan_food_paddy(
 # Transporter master
 @app.post("/transporter-master/", status_code=status.HTTP_201_CREATED)
 async def transporter_master(
-    transportermaster: TransporterMasterBase, token: TokenBase, db: Session = Depends(get_db)
+    transportermaster: TransporterMasterBase, token: str = Header(None), db: Session = Depends(get_db)
 ):
     db_transporter_master = models.Transporter_master(**transportermaster.dict())
     db.add(db_transporter_master)
@@ -2578,7 +2579,7 @@ async def transporter_master(
 
 # # About Rice Mill
 # # @app.post("/add-rice-mill/", status_code=status.HTTP_201_CREATED)
-# # async def add_rice_mill(addricemill: AddRiceMillBase, token: TokenBase, db: Session = Depends(get_db)):
+# # async def add_rice_mill(addricemill: AddRiceMillBase, token: str = Header(None), db: Session = Depends(get_db)):
 # #     db_about_rice_mill = models.Add_Rice_Mill(**addricemill.dict())
 # #     db.add(db_about_rice_mill)
 # #     db.commit()
@@ -2586,7 +2587,7 @@ async def transporter_master(
 
 # # Add New Transporters
 # # @app.post("/transporter/", status_code=status.HTTP_201_CREATED)
-# # async def add_new_trasporter(transporters: TransporterBase, token: TokenBase, db: Session = Depends(get_db)):
+# # async def add_new_trasporter(transporters: TransporterBase, token: str = Header(None), db: Session = Depends(get_db)):
 # #     db_transporter = models.Transporter(**transporters.dict())
 # #     db.add(db_transporter)
 # #     db.commit()
@@ -2594,7 +2595,7 @@ async def transporter_master(
 
 # # Add New Society
 # # @app.post("/society/", status_code=status.HTTP_201_CREATED)
-# # async def add_new_society(society: SocietyBase, token: TokenBase, db: Session = Depends(get_db)):
+# # async def add_new_society(society: SocietyBase, token: str = Header(None), db: Session = Depends(get_db)):
 # #     db_society = models.Society(**society.dict())
 # #     db.add(db_society)
 # #     db.commit()
@@ -2602,7 +2603,7 @@ async def transporter_master(
 
 # # Add New Agreement
 # # @app.post("/agreement/", status_code=status.HTTP_201_CREATED)
-# # async def add_agreement(agreement: AgreementBase, token: TokenBase, db: Session = Depends(get_db)):
+# # async def add_agreement(agreement: AgreementBase, token: str = Header(None), db: Session = Depends(get_db)):
 # #     db_agreement = models.Agreement(**agreement.dict())
 # #     db.add(db_agreement)
 # #     db.commit()
@@ -2620,7 +2621,7 @@ async def transporter_master(
 #     response_model=RiceMillRstNumber,
 #     status_code=status.HTTP_200_OK,
 # )
-# async def rice_mill_rst_number(rice_mill_id: int, token: TokenBase, db: Session = Depends(get_db)):
+# async def rice_mill_rst_number(rice_mill_id: int, token: str = Header(None), db: Session = Depends(get_db)):
 #     rice_mill_data = (
 #         db.query(models.Add_Rice_Mill).filter_by(rice_mill_id=rice_mill_id).all()
 #     )
@@ -2633,7 +2634,7 @@ async def transporter_master(
 #         "do_number_data": [AddDoBase(**row.__dict__) for row in do_number_data],
 #         "rst_data": [DhanAwakBase(**row.__dict__) for row in rst_data],
 #     }
-#     payload=get_user_from_token(token.token)
+#     payload=get_user_from_token(token)
     # message = f"New action performed by user.\nName: {payload.sub} "
     # send_telegram_message(message)
     # return rice_mill_rst_number
@@ -2644,7 +2645,7 @@ async def transporter_master(
 #     response_model=DhanAwakDalaliDhan,
 #     status_code=status.HTTP_200_OK,
 # )
-# async def get_data(rice_mill_id: int, token: TokenBase, db: Session = Depends(get_db)):
+# async def get_data(rice_mill_id: int, token: str = Header(None), db: Session = Depends(get_db)):
 #     # Fetch data from different tables
 #     total_weight = (
 #         db.query(models.Dalali_dhaan).filter_by(rice_mill_id=rice_mill_id).all()
@@ -2655,7 +2656,7 @@ async def transporter_master(
 #         db.query(models.Dhan_Awak).filter_by(rice_mill_id=rice_mill_id).all()
 #     )
 
-#     # payload=get_user_from_token(token.token)
+#     # payload=get_user_from_token(token)
     # message = f"New action performed by user.\nName: {payload.sub} "
     # send_telegram_message(message)
     # return the result as a custom response model
@@ -2666,7 +2667,7 @@ async def transporter_master(
 #         "miller_purana": [row.miller_purana for row in miller_purana],
 #     }
 
-# #     payload=get_user_from_token(token.token)
+# #     payload=get_user_from_token(token)
 #     message = f"New action performed by user.\nName: {payload.sub} "
 #     send_telegram_message(message)
 #     return response_data
@@ -2678,7 +2679,7 @@ async def transporter_master(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_data(rice_mill_id: int, token: TokenBase, db: Session = Depends(get_db)):
+async def get_data(rice_mill_id: int, token: str = Header(None), db: Session = Depends(get_db)):
     # Fetch data from different tables
     total_weight = db.query(models.Dalali_dhaan).all()
     dm_weight = db.query(models.Dhan_Awak).filter_by(rice_mill_id=rice_mill_id).all()
@@ -2701,7 +2702,7 @@ async def get_data(rice_mill_id: int, token: TokenBase, db: Session = Depends(ge
         ],
     }
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return DhanAwakDalaliDhan(**response_data)
@@ -2713,7 +2714,7 @@ async def get_data(rice_mill_id: int, token: TokenBase, db: Session = Depends(ge
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_data(rice_mill_id: int, token: TokenBase, db: Session = Depends(get_db)):
+async def get_data(rice_mill_id: int, token: str = Header(None), db: Session = Depends(get_db)):
     mill_weight = db.query(models.Rice_Purchase).all()
     rice_deposide_data = (
         db.query(models.Rice_deposite).filter_by(rice_mill_name_id=rice_mill_id).all()
@@ -2740,7 +2741,7 @@ async def get_data(rice_mill_id: int, token: TokenBase, db: Session = Depends(ge
         "husk_data": [row.__dict__ for row in husk_data],
     }
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return inventoryData(**response_data)
@@ -2756,7 +2757,7 @@ class BardanaDataDhanAwak(BaseModel):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(api_key_header)],
 )
-async def get_data(rice_mill_id: int, token: TokenBase, db: Session = Depends(get_db)):
+async def get_data(rice_mill_id: int, token: str = Header(None), db: Session = Depends(get_db)):
     # Fetch data from different tables
     Dhan_Awak_Data = (
         db.query(models.Dhan_Awak).filter_by(rice_mill_id=rice_mill_id).all()
@@ -2767,7 +2768,7 @@ async def get_data(rice_mill_id: int, token: TokenBase, db: Session = Depends(ge
         "Dhan_Awak_Data": [DhanAwakBase(**row.__dict__) for row in Dhan_Awak_Data],
     }
 
-    payload=get_user_from_token(token.token)
+    payload=get_user_from_token(token)
     message = f"New action performed by user.\nName: {payload.sub} "
     send_telegram_message(message)
     return BardanaDataDhanAwak(**response_data)
