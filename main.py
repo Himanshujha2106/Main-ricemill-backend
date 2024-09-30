@@ -198,41 +198,41 @@ async def set_admin( admin_key:str,token: str = Header(None),db: Session = Depen
 
 
 
-@app.post(
-    "/set-role/",
-    status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(api_key_header)],
-    tags=["Role"]
-)
-async def set_role(role: RoleBase, token: str = Header(None), db: Session = Depends(get_db)):
-    if(role.role=="admin"):
-        raise HTTPException(status_code=404, detail="Cannot set admin via this route, use set-admin route")
+# @app.post(
+#     "/set-role/",
+#     status_code=status.HTTP_201_CREATED,
+#     dependencies=[Depends(api_key_header)],
+#     tags=["Role"]
+# )
+# async def set_role(role: RoleBase, token: str = Header(None), db: Session = Depends(get_db)):
+#     if(role.role=="admin"):
+#         raise HTTPException(status_code=404, detail="Cannot set admin via this route, use set-admin route")
 
 
-    payload = get_user_from_token(token)
-    print(payload)
-    Email = payload.get('sub')
+#     payload = get_user_from_token(token)
+#     print(payload)
+#     Email = payload.get('sub')
    
-    db_user = db.query(models.User).filter(models.User.email == Email).first()
+#     db_user = db.query(models.User).filter(models.User.email == Email).first()
     
 
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if(db_user.role != "admin"):
-         raise HTTPException(status_code=500, detail="Not have necessary permission")
-    user = db.query(models.User).filter(models.User.email == role.user_email).first()
-    if(not user):
-        raise HTTPException(status_code=404, detail="User not found")
-    # Update only the role column
-    user.role = role.role
-    db.commit()
-    db.refresh(db_user)
+#     if not db_user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     if(db_user.role != "admin"):
+#          raise HTTPException(status_code=500, detail="Not have necessary permission")
+#     user = db.query(models.User).filter(models.User.email == role.user_email).first()
+#     if(not user):
+#         raise HTTPException(status_code=404, detail="User not found")
+#     # Update only the role column
+#     user.role = role.role
+#     db.commit()
+#     db.refresh(db_user)
 
-    # Send a Telegram message
-    message = f"Role updated for user:\nName: {db_user.name}\nEmail: {db_user.email}\nNew Role: {db_user.role}"
-    send_telegram_message(message)
+#     # Send a Telegram message
+#     message = f"Role updated for user:\nName: {db_user.name}\nEmail: {db_user.email}\nNew Role: {db_user.role}"
+#     send_telegram_message(message)
 
-    return {"message": "User role updated successfully", "user": db_user}
+#     return {"message": "User role updated successfully", "user": db_user}
 
 
 
@@ -690,7 +690,7 @@ async def get_all_agreements_number(token: str = Header(None), db: Session = Dep
 @app.post("/create-user/", tags=["Authentication"])
 def create_user(user: UserCreateBase,db: Session = Depends(get_db)):
     hashed_password = hash_password(user.password)
-    db_user = models.User(name=user.name, email=user.email, password=hashed_password)
+    db_user = models.User(name=user.name, email=user.email, password=hashed_password,role=user.role)
 
     # Check if user already exists
     user_exists = db.query(models.User).filter(models.User.email == user.email).first()
@@ -700,11 +700,7 @@ def create_user(user: UserCreateBase,db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    if(db_user.id==1):
-        db_user.role='1'
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+    
 
 
     # Send Telegram message
