@@ -253,6 +253,21 @@ async def get_all_users(token: str = Header(None) , db: Session = Depends(get_db
     send_telegram_message(message)
     return users
 
+@app.get(
+    "/users/{id}",
+    response_model=List[UserBase],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(api_key_header)],
+    tags=["User"]
+)
+async def get_all_users(token: str = Header(None) , db: Session = Depends(get_db)):
+    users = db.query(models.User.id==id).first()
+    
+    payload=get_user_from_token(token)
+    message = f"New action performed by user.\nName: {payload.get('sub')}"
+    send_telegram_message(message)
+    return users
+
 
 
 
