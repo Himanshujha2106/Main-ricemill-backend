@@ -672,7 +672,7 @@ async def get_all_agreements_number(token: str = Header(None), db: Session = Dep
 
 
 
-@app.post("/users/", tags=["Authentication"])
+@app.post("/create-user/", tags=["Authentication"])
 def create_user(user: UserCreateBase,db: Session = Depends(get_db)):
     hashed_password = hash_password(user.password)
     db_user = models.User(name=user.name, email=user.email, password=hashed_password)
