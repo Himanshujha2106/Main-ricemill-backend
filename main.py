@@ -302,7 +302,7 @@ async def add_rice_mill(addricemill: AddRiceMillBase, token: str = Header(None),
     db.commit()
     db.refresh(db_about_rice_mill)
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
 
  
@@ -320,7 +320,7 @@ async def add_rice_mill(addricemill: AddRiceMillBase, token: str = Header(None),
 async def rice_mill_data(token: str = Header(None), db: Session = Depends(get_db)):
     db_rice_mill_data = db.query(models.Add_Rice_Mill).distinct().all()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_rice_mill_data
 
@@ -355,7 +355,7 @@ async def add_new_trasporter(
     db.refresh(db_transporter)
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_transporter
 
@@ -371,7 +371,7 @@ async def add_new_trasporter(
 async def get_all_transporters(token: str = Header(None), db: Session = Depends(get_db)):
     transporters = db.query(models.Transporter).distinct().all()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return transporters
 
@@ -400,7 +400,7 @@ async def add_new_truck(truck: TruckBase, token: str = Header(None), db: Session
     db.add(db_truck)
     db.commit()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return truck
 
@@ -430,7 +430,7 @@ async def get_all_truck_data(token: str = Header(None), db: Session = Depends(ge
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -447,7 +447,7 @@ async def get_all_truck_data(token: str = Header(None), db: Session = Depends(ge
 async def get_truck_numbers(token: str = Header(None), db: Session = Depends(get_db)):
     db_truck_numbers = db.query(models.Truck.truck_number).distinct().all()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return [truck_number[0] for truck_number in db_truck_numbers]
 
@@ -477,7 +477,7 @@ async def add_society(addsociety: SocietyBase, token: str = Header(None), db: Se
     db.refresh(db_society)
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_society
 
@@ -494,7 +494,7 @@ async def add_society(addsociety: SocietyBase, token: str = Header(None), db: Se
 async def get_all_society_data(token: str = Header(None), db: Session = Depends(get_db)):
     societys = db.query(models.Society).distinct().all()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return societys
 
@@ -511,7 +511,7 @@ async def get_all_society_data(token: str = Header(None), db: Session = Depends(
 async def get_all_societyes_names(token: str = Header(None), db: Session = Depends(get_db)):
     db_get_all_societyes_names = db.query(models.Society.society_name).distinct().all()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return [all_society_name[0] for all_society_name in db_get_all_societyes_names]
 
@@ -536,7 +536,7 @@ async def society_data(society_id: int, token: str = Header(None), db: Session =
         ],
     }
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return society_transporting_data
 
@@ -571,7 +571,7 @@ async def add_agreement(addagreement: AgreementBase, token: str = Header(None), 
     db.refresh(db_agreement)
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_agreement
 
@@ -583,7 +583,7 @@ async def add_agreement(addagreement: AgreementBase, token: str = Header(None), 
 # async def get_all_agreement_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     agreements = db.query(models.Agreement).distinct().all()
 #     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return agreements
 
@@ -618,7 +618,7 @@ async def get_all_agreements_data(token: str = Header(None), db: Session = Depen
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -654,7 +654,7 @@ async def get_all_agreements_number(token: str = Header(None), db: Session = Dep
         )
 
         payload=get_user_from_token(token)
-        message = f"New action performed by user.\nName: {payload.sub} "
+        message = f"New action performed by user.\nName: {payload.get('sub')} "
         send_telegram_message(message)
         return result
 
@@ -679,7 +679,7 @@ async def get_all_agreements_number(token: str = Header(None), db: Session = Dep
 #     # Send Telegram message
    
 #     payload=get_user_from_token(token)
-#     message = f"New action performed by user.\nName: {payload.sub} "
+#     message = f"New action performed by user.\nName: {payload.get('sub')} "
 #     send_telegram_message(message)
 #     return {"message": "User created successfully", "user": db_user}
 
@@ -763,7 +763,7 @@ async def add_ware_house(
     db.refresh(db_add_ware_house)
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_add_ware_house
 
@@ -779,7 +779,7 @@ async def add_ware_house(
 async def get_all_ware_house_data(token: str = Header(None), db: Session = Depends(get_db)):
     ware_house_db = db.query(models.ware_house_transporting).distinct().all()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return ware_house_db
 
@@ -810,7 +810,7 @@ async def add_kochia(addkochia: KochiaBase, token: str = Header(None), db: Sessi
     db.refresh(db_kochia)
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_kochia
 
@@ -821,7 +821,7 @@ async def add_kochia(addkochia: KochiaBase, token: str = Header(None), db: Sessi
 # async def kochia_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_kochia_data = db.query(models.Kochia).distinct().all()
 #     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_kochia_data
 
@@ -852,7 +852,7 @@ async def get_all_kochia_data(token: str = Header(None), db: Session = Depends(g
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -879,7 +879,7 @@ async def add_party(party: PartyBase, token: str = Header(None), db: Session = D
     db.add(db_add_party)
     db.commit()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return party
 
@@ -895,7 +895,7 @@ async def add_party(party: PartyBase, token: str = Header(None), db: Session = D
 async def get_party_data(token: str = Header(None), db: Session = Depends(get_db)):
     db_party_data = db.query(models.Party).distinct().all()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_party_data
 
@@ -924,7 +924,7 @@ async def add_broker(broker:  BrokerBase, token: str = Header(None), db: Session
     db.refresh(db_add_broker)
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_add_broker
 
@@ -940,7 +940,7 @@ async def add_broker(broker:  BrokerBase, token: str = Header(None), db: Session
 async def get_broker_data(token: str = Header(None), db: Session = Depends(get_db)):
     db_broker_data = db.query(models.brokers).distinct().all()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_broker_data
 
@@ -968,7 +968,7 @@ async def get_data(token: str = Header(None), db: Session = Depends(get_db)):
     }
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return response_data
 
@@ -995,7 +995,7 @@ async def adddodata(rice_mill_id: int, token: str = Header(None), db: Session = 
     }
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return adddo_data
 
@@ -1023,7 +1023,7 @@ async def add_do(adddo: AddDoBase, token: str = Header(None), db: Session = Depe
     db.refresh(db_add_do)
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_add_do
 
@@ -1034,7 +1034,7 @@ async def add_do(adddo: AddDoBase, token: str = Header(None), db: Session = Depe
 # async def get_all_add_do_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     add_do = db.query(models.Add_Do).distinct().all()
 #     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return add_do
 
@@ -1085,7 +1085,7 @@ async def get_all_add_do_data(token: str = Header(None), db: Session = Depends(g
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -1111,7 +1111,7 @@ async def rice_do_number_data(rice_mill_id: int, token: str = Header(None), db: 
         "do_number_data": [AddDoBase(**row.__dict__) for row in do_number_data],
     }
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return dhan_awak
 
@@ -1139,7 +1139,7 @@ async def Dhan_awak_data(token: str = Header(None), db: Session = Depends(get_db
         ],
     }
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return dhan_awak_data
 
@@ -1163,7 +1163,7 @@ async def truck_transporter_data(transport_id: int, token: str = Header(None), d
         ],
     }
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return dhan_awak_truck_transporter
 
@@ -1252,7 +1252,7 @@ async def get_all_dhan_awak_data(token: str = Header(None), db: Session = Depend
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -1277,7 +1277,7 @@ async def broken_data(token: str = Header(None), db: Session = Depends(get_db)):
         "brokers_data": [BrokerBase(**row.__dict__) for row in brokers_data],
     }
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return broken_data
 
@@ -1341,7 +1341,7 @@ async def get_all_other_awak_data(token: str = Header(None), db: Session = Depen
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -1368,7 +1368,7 @@ async def warehouse_data(warehouse_id: int, token: str = Header(None), db: Sessi
         "hamalirate": warehouse_data.hamalirate,
     }
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return response_data
 
@@ -1397,7 +1397,7 @@ async def rice_deposit_data(token: str = Header(None), db: Session = Depends(get
         ],
     }
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return rice_deposit_data
 
@@ -1422,7 +1422,7 @@ async def rice_deposite(ricedeposite: RiceDepositeBase, token: str = Header(None
 # async def rice_deposite_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_rice_deposite_data = db.query(models.Rice_deposite).distinct().all()
 # #     payload=get_user_from_token(token)
-#     message = f"New action performed by user.\nName: {payload.sub} "
+#     message = f"New action performed by user.\nName: {payload.get('sub')} "
 #     send_telegram_message(message)
 #     return db_rice_deposite_data
 
@@ -1485,7 +1485,7 @@ async def get_all_rice_deposite_data(token: str = Header(None), db: Session = De
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -1511,7 +1511,7 @@ async def dalali_dhaan(dalalidhaan: DalaliDhaanBase, token: str = Header(None), 
 # async def dalali_dhaan_data_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_dalali_dhaan_data_data = db.query(models.Dalali_dhaan).distinct().all()
 #     payload=get_user_from_token(token)
-    # message = f"New action performed by user.\nName: {payload.sub} "
+    # message = f"New action performed by user.\nName: {payload.get('sub')} "
     # send_telegram_message(message)
     # return db_dalali_dhaan_data_data
 
@@ -1567,7 +1567,7 @@ async def get_all_dalali_dhaan_data(token: str = Header(None), db: Session = Dep
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -1591,7 +1591,7 @@ async def frk(frk: FrkBase, token: str = Header(None), db: Session = Depends(get
 # async def frk_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_frk_data = db.query(models.Frk).distinct().all()
 #     payload=get_user_from_token(token)
-    # message = f"New action performed by user.\nName: {payload.sub} "
+    # message = f"New action performed by user.\nName: {payload.get('sub')} "
     # send_telegram_message(message)
     # return db_frk_data
 
@@ -1631,7 +1631,7 @@ async def get_all_add_do_data(token: str = Header(None), db: Session = Depends(g
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -1659,7 +1659,7 @@ async def sauda_patrak(saudapatrak: SaudaPatrakBase, token: str = Header(None), 
 # async def sauda_patrak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_sauda_patrak_data = db.query(models.Sauda_patrak).distinct().all()
 #     payload=get_user_from_token(token)
-    # message = f"New action performed by user.\nName: {payload.sub} "
+    # message = f"New action performed by user.\nName: {payload.get('sub')} "
     # send_telegram_message(message)
     # return db_sauda_patrak_data
 
@@ -1697,7 +1697,7 @@ async def get_all_sauda_patrak_data(token: str = Header(None), db: Session = Dep
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -1758,7 +1758,7 @@ async def get_all_sauda_patrak_data(token: str = Header(None), db: Session = Dep
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -1790,7 +1790,7 @@ async def dhan_transporting_data(token: str = Header(None), db: Session = Depend
         ],
     }
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return dhan_transporting_data
 
@@ -1815,7 +1815,7 @@ async def rice_mill_rst_number(rice_mill_id: int, token: str = Header(None), db:
         "rst_data": [DhanAwakBase(**row.__dict__) for row in rst_data],
     }
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return rice_mill_rst_number
 
@@ -1842,7 +1842,7 @@ async def dhan_transporting(
 # async def dhan_transporting_data(token: str = Header(None), db: Session = Depends(get_db)):
 # #     db_dhan_transporting_data = db.query(models.Dhan_transporting).distinct().all()
 # #     payload=get_user_from_token(token)
-#     message = f"New action performed by user.\nName: {payload.sub} "
+#     message = f"New action performed by user.\nName: {payload.get('sub')} "
 #     send_telegram_message(message)
 #     return db_dhan_transporting_data
 
@@ -1897,7 +1897,7 @@ async def get_all_sauda_patrak_data(token: str = Header(None), db: Session = Dep
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -1923,7 +1923,7 @@ async def add_other_jawak(otherjawak: OtherJawakBase, token: str = Header(None),
 # async def get_other_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_jawak_data = db.query(models.Other_jawak).distinct().all()
 # #     payload=get_user_from_token(token)
-#     message = f"New action performed by user.\nName: {payload.sub} "
+#     message = f"New action performed by user.\nName: {payload.get('sub')} "
 #     send_telegram_message(message)
 #     return db_get_other_jawak_data
 
@@ -1966,7 +1966,7 @@ async def get_all_other_jawak_data(token: str = Header(None), db: Session = Depe
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -1992,7 +1992,7 @@ async def add_broken_jawak(brokenjawak: BrokenJawak, token: str = Header(None), 
 # async def get_other_broken_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_broken_jawak_data = db.query(models.broken_jawak).distinct().all()
 # #     payload=get_user_from_token(token)
-#     message = f"New action performed by user.\nName: {payload.sub} "
+#     message = f"New action performed by user.\nName: {payload.get('sub')} "
 #     send_telegram_message(message)
 #     return db_get_other_broken_jawak_data
 
@@ -2047,7 +2047,7 @@ async def get_all_other_jawak_data(token: str = Header(None), db: Session = Depe
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -2075,7 +2075,7 @@ async def add_husk_jawak(huskjawak: HuskJawakBase, token: str = Header(None), db
 # async def get_other_husk_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_husk_jawak_data = db.query(models.husk_jawak).distinct().all()
 # #     payload=get_user_from_token(token)
-#     message = f"New action performed by user.\nName: {payload.sub} "
+#     message = f"New action performed by user.\nName: {payload.get('sub')} "
 #     send_telegram_message(message)
 #     return db_get_other_husk_jawak_data
 
@@ -2130,7 +2130,7 @@ async def get_all_husk_jawak_data(token: str = Header(None), db: Session = Depen
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -2158,7 +2158,7 @@ async def add_nakkhi_jawak(nakkhijawak: NakkhiJawakBase, token: str = Header(Non
 # async def get_other_nakkhi_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_nakkhi_jawak_data = db.query(models.nakkhi_jawak).distinct().all()
 #     payload=get_user_from_token(token)
-    # message = f"New action performed by user.\nName: {payload.sub} "
+    # message = f"New action performed by user.\nName: {payload.get('sub')} "
     # send_telegram_message(message)
     # return db_get_other_nakkhi_jawak_data
 
@@ -2213,7 +2213,7 @@ async def get_all_nakkhi_jawak_data(token: str = Header(None), db: Session = Dep
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -2241,7 +2241,7 @@ async def add_bran_jawak(branjawak: BranJawakBase, token: str = Header(None), db
 # async def get_other_bran_jawak_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_bran_jawak_data = db.query(models.bran_jawak).distinct().all()
 #     payload=get_user_from_token(token)
-    # message = f"New action performed by user.\nName: {payload.sub} "
+    # message = f"New action performed by user.\nName: {payload.get('sub')} "
     # send_telegram_message(message)
     # return db_get_other_bran_jawak_data
 
@@ -2294,7 +2294,7 @@ async def get_all_bran_jawak_data(token: str = Header(None), db: Session = Depen
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -2322,7 +2322,7 @@ async def add_bhushi(bhushi: BhushiBase, token: str = Header(None), db: Session 
 # async def get_other_bhushi_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_get_other_bhushi_data = db.query(models.bhushi).distinct().all()
 #     payload=get_user_from_token(token)
-    # message = f"New action performed by user.\nName: {payload.sub} "
+    # message = f"New action performed by user.\nName: {payload.get('sub')} "
     # send_telegram_message(message)
     # return db_get_other_bhushi_data
 
@@ -2365,7 +2365,7 @@ async def get_all_bhushi_jawak_data(token: str = Header(None), db: Session = Dep
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -2393,7 +2393,7 @@ async def paddy_sale(paddysale: PaddySaleBase, token: str = Header(None), db: Se
 # async def paddy_sale_data(token: str = Header(None), db: Session = Depends(get_db)):
 #     db_paddy_sale_data = db.query(models.Paddy_sale).distinct().all()
 #     payload=get_user_from_token(token)
-    # message = f"New action performed by user.\nName: {payload.sub} "
+    # message = f"New action performed by user.\nName: {payload.get('sub')} "
     # send_telegram_message(message)
     # return db_paddy_sale_data
 
@@ -2449,7 +2449,7 @@ async def get_all_paddy_sale_data(token: str = Header(None), db: Session = Depen
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -2507,7 +2507,7 @@ async def get_all_rice_purchase_data(token: str = Header(None), db: Session = De
         )
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return result
 
@@ -2534,7 +2534,7 @@ async def cash_in_out(cash_in_out: CashInCashOutBase, token: str = Header(None),
 async def cash_in_out_data(token: str = Header(None), db: Session = Depends(get_db)):
     db_cash_in_out_data = db.query(models.CashInCashOut).distinct().all()
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return db_cash_in_out_data
 
@@ -2646,7 +2646,7 @@ async def transporter_master(
 #         "rst_data": [DhanAwakBase(**row.__dict__) for row in rst_data],
 #     }
 #     payload=get_user_from_token(token)
-    # message = f"New action performed by user.\nName: {payload.sub} "
+    # message = f"New action performed by user.\nName: {payload.get('sub')} "
     # send_telegram_message(message)
     # return rice_mill_rst_number
 
@@ -2668,7 +2668,7 @@ async def transporter_master(
 #     )
 
 #     # payload=get_user_from_token(token)
-    # message = f"New action performed by user.\nName: {payload.sub} "
+    # message = f"New action performed by user.\nName: {payload.get('sub')} "
     # send_telegram_message(message)
     # return the result as a custom response model
 #     response_data = {
@@ -2679,7 +2679,7 @@ async def transporter_master(
 #     }
 
 # #     payload=get_user_from_token(token)
-#     message = f"New action performed by user.\nName: {payload.sub} "
+#     message = f"New action performed by user.\nName: {payload.get('sub')} "
 #     send_telegram_message(message)
 #     return response_data
 
@@ -2714,7 +2714,7 @@ async def get_data(rice_mill_id: int, token: str = Header(None), db: Session = D
     }
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return DhanAwakDalaliDhan(**response_data)
 
@@ -2753,7 +2753,7 @@ async def get_data(rice_mill_id: int, token: str = Header(None), db: Session = D
     }
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return inventoryData(**response_data)
 
@@ -2780,6 +2780,6 @@ async def get_data(rice_mill_id: int, token: str = Header(None), db: Session = D
     }
 
     payload=get_user_from_token(token)
-    message = f"New action performed by user.\nName: {payload.sub} "
+    message = f"New action performed by user.\nName: {payload.get('sub')} "
     send_telegram_message(message)
     return BardanaDataDhanAwak(**response_data)
